@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meditation Timer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .timer-container {
+            text-align: center;
+            padding: 3rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .timer-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            letter-spacing: 0.5px;
+        }
+        
+        .timer-circle {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin: 0 auto 2rem;
+        }
+        
+        .circle-bg {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        .circle-progress {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring {
+            width: 100%;
+            height: 100%;
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.8);
+            stroke-width: 6;
+            stroke-linecap: round;
+            stroke-dasharray: 879.646; /* 2 * π * 140 */
+            stroke-dashoffset: 879.646;
+            transition: stroke-dashoffset 1s ease;
+        }
+        
+        .timer-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 3.5rem;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            letter-spacing: -2px;
+        }
+        
+        .timer-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            min-width: 100px;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .control-btn:active {
+            transform: translateY(0);
+        }
+        
+        .control-btn.primary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .control-btn.primary:hover {
+            background: white;
+            transform: translateY(-2px);
+        }
+        
+        .status-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            font-weight: 400;
+            margin-top: 1rem;
+        }
+        
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.8;
+            }
+        }
+        
+        .breathing-animation {
+            animation: breathe 4s ease-in-out infinite;
+        }
+        
+        @keyframes breathe {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.02);
+            }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            color: #667eea;
+            padding: 1rem 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        @media (max-width: 640px) {
+            .timer-container {
+                padding: 2rem;
+            }
+            
+            .timer-circle {
+                width: 240px;
+                height: 240px;
+            }
+            
+            .timer-display {
+                font-size: 2.5rem;
+            }
+            
+            .timer-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .control-btn {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="timer-container breathing-animation">
+        <h1 class="timer-title">Meditation Timer</h1>
+        
+        <div class="timer-circle">
+            <div class="circle-bg"></div>
+            <div class="circle-progress">
+                <svg width="280" height="280">
+                    <circle cx="140" cy="140" r="140" class="progress-ring" id="progressRing"/>
+                </svg>
+            </div>
+            <div class="timer-display" id="timerDisplay">15:00</div>
+        </div>
+        
+        <div class="timer-controls">
+            <button class="control-btn primary" id="startBtn" onclick="toggleTimer()">Start</button>
+            <button class="control-btn" id="resetBtn" onclick="resetTimer()">Reset</button>
+        </div>
+        
+        <div class="status-text" id="statusText">Ready to begin your meditation</div>
+    </div>
+    
+    <div class="notification" id="notification">
+        Timer completed! 🧘‍♀️
+    </div>
+
+    <script>
+        let timeLeft = 15 * 60; // 15 minutes in seconds
+        let totalTime = 15 * 60;
+        let timerInterval = null;
+        let isRunning = false;
+        
+        const timerDisplay = document.getElementById('timerDisplay');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const statusText = document.getElementById('statusText');
+        const progressRing = document.getElementById('progressRing');
+        const notification = document.getElementById('notification');
+        const timerContainer = document.querySelector('.timer-container');
+        
+        // Audio context for subtle sound alerts
+        let audioContext = null;
+        
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        
+        function playTone(frequency, duration, volume = 0.1) {
+            if (!audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.1);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+        
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+        
+        function updateProgress() {
+            const progress = (totalTime - timeLeft) / totalTime;
+            const circumference = 2 * Math.PI * 140;
+            const offset = circumference - (progress * circumference);
+            progressRing.style.strokeDashoffset = offset;
+        }
+        
+        function updateDisplay() {
+            timerDisplay.textContent = formatTime(timeLeft);
+            updateProgress();
+        }
+        
+        function toggleTimer() {
+            if (!isRunning) {
+                startTimer();
+            } else {
+                pauseTimer();
+            }
+        }
+        
+        function startTimer() {
+            initAudio();
+            isRunning = true;
+            startBtn.textContent = 'Pause';
+            statusText.textContent = 'Meditation in progress...';
+            timerContainer.classList.add('pulse');
+            
+            // Play start tone
+            playTone(440, 0.2, 0.05);
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateDisplay();
+                
+                // Play subtle tick every minute
+                if (timeLeft % 60 === 0 && timeLeft > 0) {
+                    playTone(880, 0.1, 0.03);
+                }
+                
+                if (timeLeft <= 0) {
+                    completeTimer();
+                }
+            }, 1000);
+        }
+        
+        function pauseTimer() {
+            isRunning = false;
+            startBtn.textContent = 'Resume';
+            statusText.textContent = 'Meditation paused';
+            timerContainer.classList.remove('pulse');
+            clearInterval(timerInterval);
+            
+            // Play pause tone
+            playTone(330, 0.2, 0.05);
+        }
+        
+        function resetTimer() {
+            isRunning = false;
+            timeLeft = totalTime;
+            startBtn.textContent = 'Start';
+            statusText.textContent = 'Ready to begin your meditation';
+            timerContainer.classList.remove('pulse');
+            clearInterval(timerInterval);
+            updateDisplay();
+            
+            // Play reset tone
+            playTone(220, 0.3, 0.05);
+        }
+        
+        function completeTimer() {
+            isRunning = false;
+            timeLeft = 0;
+            startBtn.textContent = 'Start';
+            statusText.textContent = 'Meditation complete! Well done 🧘‍♀️';
+            timerContainer.classList.remove('pulse');
+            clearInterval(timerInterval);
+            updateDisplay();
+            
+            // Play completion chime sequence
+            setTimeout(() => playTone(523, 0.3, 0.08), 0);
+            setTimeout(() => playTone(659, 0.3, 0.08), 200);
+            setTimeout(() => playTone(784, 0.5, 0.08), 400);
+            
+            // Show notification
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+        
+        // Initialize display
+        updateDisplay();
+        
+        // Handle visibility change to pause timer when tab is not active
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && isRunning) {
+                // Timer continues running in background for meditation
+                // but we could pause it here if desired
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96c7e2a6e13e30fe',t:'MTc1NDc0OTEzNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
