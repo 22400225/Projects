@@ -1,8 +1,7 @@
-void introduce(String name, {int age = 20}){
-    print("$name, $age");
+void introduce(String job, {required String name, int age = 20}){
+    print("$job, $name, $age");
 }
 
 void main(){
-    introduce(age: 21, "jiwon");
+    introduce( "student", age: 21, name: "jiwon");
 }
-
