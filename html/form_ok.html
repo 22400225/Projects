@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전송된 정보</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        p { font-size: 1.2em; }
+        strong { color: #007BFF; }
+    </style>
+</head>
+<body>
+    <h2>✅ 전송받은 사용자 정보 (JavaScript)</h2>
+    
+    <div id="result">
+        </div>
+
+    <br>
+    <a href="index.html">돌아가기</a>
+
+    <script>
+        // 페이지가 로드되면 바로 실행됩니다.
+        window.onload = function() {
+            // 1. localStorage에서 'userInfo'라는 이름으로 저장된 데이터를 가져옵니다.
+            const jsonData = localStorage.getItem('userInfo');
+
+            // 2. 데이터가 있는지 확인합니다.
+            if (jsonData) {
+                // 3. 가져온 JSON 문자열을 다시 자바스크립트 객체로 변환합니다.
+                const data = JSON.parse(jsonData);
+
+                // '구분' 라디오 버튼 값에 따라 텍스트를 정합니다.
+                let categoryText = "선택 안 함";
+                if (data.category === "1") {
+                    categoryText = "신입생";
+                } else if (data.category === "2") {
+                    categoryText = "재학생";
+                }
+
+                // 4. 결과를 표시할 HTML 내용을 만듭니다.
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = `
+                    <p><strong>사용자 이름:</strong> ${data.username}</p>
+                    <p><strong>사용자 이메일:</strong> ${data.email}</p>
+                    <p><strong>비밀번호:</strong> ${data.password}</p>
+                    <p><strong>구분:</strong> ${categoryText}</p>
+                `;
+
+                // (선택사항) 정보를 한번 보여준 뒤에는 저장소에서 삭제하여 깔끔하게 처리할 수 있습니다.
+                localStorage.removeItem('userInfo');
+            } else {
+                // 저장된 데이터가 없으면 메시지를 표시합니다.
+                document.getElementById('result').innerHTML = '<p>전송된 정보가 없습니다.</p>';
+            }
+        };
+    </script>
+</body>
+</html>

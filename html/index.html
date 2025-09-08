@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>정보 입력</title>
+</head>
+<body>
+    <div>
+        <h2>HTML Forms</h2>
+        <p>사용자 정보 입력</p>
+        <form id="userInfoForm" action="form_ok.html" method="post">
+            <div>사용자 이름 :
+                <input type="text" name="username">
+            </div>
+            <div>사용자 이메일 :
+                <input type="text" name="email">
+            </div>
+            <div>비밀번호 :
+                <input type="password" name="password">
+            </div>
+            <div>구분 :
+                <input type="radio" name="category" value="1"> 신입생
+                <input type="radio" name="category" value="2"> 재학생
+            </div>
+            <input type="submit" value="전송">
+        </form>
+    </div>
+
+    <script>
+        // id가 userInfoForm인 폼을 찾습니다.
+        const form = document.getElementById('userInfoForm');
+
+        // 폼에서 'submit' 이벤트가 발생하면 실행될 함수를 연결합니다.
+        form.addEventListener('submit', function(event) {
+            // 1. 원래의 폼 전송 기능을 막습니다.
+            event.preventDefault(); 
+
+            // 2. 폼 데이터를 FormData 객체로 쉽게 가져옵니다.
+            const formData = new FormData(form);
+
+            // 3. FormData를 일반 객체로 변환합니다.
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+
+            // 4. 객체를 JSON 문자열로 변환하여 localStorage에 저장합니다.
+            // 'userInfo'라는 이름으로 데이터를 저장합니다.
+            localStorage.setItem('userInfo', JSON.stringify(data));
+
+            // 5. 'form_ok.html' 페이지로 이동시킵니다.
+            window.location.href = form.action;
+        });
+    </script>
+</body>
+</html>
